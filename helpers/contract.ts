@@ -1,6 +1,6 @@
-import { deployments, ethers, waffle, getNamedAccounts } from 'hardhat';
+import { deployments, ethers } from 'hardhat';
 import { Contract } from 'ethers';
-import { Greeter } from '../types';
+import { RewardToken, NFTStaking, PriceOracle, MockNFT, MockNFTOracle } from '../types';
 import { ContractId } from './types';
 
 export const deployContract = async <ContractType extends Contract>(
@@ -20,15 +20,55 @@ export const deployContract = async <ContractType extends Contract>(
   return contract;
 };
 
-export const deployGreeter = async (_greeting: string) => {
-  return await deployContract<Greeter>('Greeter', [_greeting]);
+export const deployMockNFT = async (): Promise<MockNFT> => {
+  return await deployContract<MockNFT>(ContractId.Nft, []);
 };
 
-export const getGreeterDeployment = async (): Promise<Greeter> => {
+export const deployMockNFTOracle = async (nft: string): Promise<MockNFTOracle> => {
+  return await deployContract<MockNFTOracle>(ContractId.NFTOracle, [nft]);
+};
+
+export const getRewardTokenDeployment = async (): Promise<RewardToken> => {
   return (await ethers.getContractAt(
-    ContractId.Greeter,
+    ContractId.RewardToken,
     (
-      await deployments.get(ContractId.Greeter)
+      await deployments.get(ContractId.RewardToken)
     ).address
-  )) as Greeter;
+  )) as RewardToken;
+};
+
+export const getNFTStakingDeployment = async (): Promise<NFTStaking> => {
+  return (await ethers.getContractAt(
+    ContractId.NFTStaking,
+    (
+      await deployments.get(ContractId.NFTStaking)
+    ).address
+  )) as NFTStaking;
+};
+
+export const getPriceOracleDeployment = async (): Promise<PriceOracle> => {
+  return (await ethers.getContractAt(
+    ContractId.PriceOracle,
+    (
+      await deployments.get(ContractId.PriceOracle)
+    ).address
+  )) as PriceOracle;
+};
+
+export const getNftDeployment = async (): Promise<MockNFT> => {
+  return (await ethers.getContractAt(
+    ContractId.Nft,
+    (
+      await deployments.get(ContractId.Nft)
+    ).address
+  )) as MockNFT;
+};
+
+export const getNFTOracleDeployment = async (): Promise<MockNFTOracle> => {
+  return (await ethers.getContractAt(
+    ContractId.NFTOracle,
+    (
+      await deployments.get(ContractId.NFTOracle)
+    ).address
+  )) as MockNFTOracle;
 };

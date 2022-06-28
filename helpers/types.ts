@@ -1,5 +1,9 @@
 export enum ContractId {
-  Greeter = 'Greeter',
+  Nft = 'MockNFT',
+  NFTOracle = 'MockNFTOracle',
+  PriceOracle = 'PriceOracle',
+  RewardToken = 'RewardToken',
+  NFTStaking = 'NFTStaking',
 }
 
 export type EthereumAddress = string;
