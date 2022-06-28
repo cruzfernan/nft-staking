@@ -2,9 +2,15 @@ import { deployments, ethers, getNamedAccounts } from 'hardhat';
 import { Signer, Wallet } from 'ethers';
 import { assert } from 'chai';
 
-import { Greeter } from '../types';
+import { RewardToken, NFTStaking, PriceOracle, MockNFT, MockNFTOracle } from '../types';
 import { EthereumAddress } from '../helpers/types';
-import { getGreeterDeployment, deployGreeter } from '../helpers/contract';
+import {
+  getRewardTokenDeployment,
+  getNFTStakingDeployment,
+  getPriceOracleDeployment,
+  getNftDeployment,
+  getNFTOracleDeployment,
+} from '../helpers/contract';
 
 export interface IAccount {
   address: EthereumAddress;
@@ -13,13 +19,21 @@ export interface IAccount {
 }
 
 export interface TestVars {
-  Greeter: Greeter;
+  RewardToken: RewardToken;
+  NFTStaking: NFTStaking;
+  PriceOracle: PriceOracle;
+  Nft: MockNFT;
+  NftOracle: MockNFTOracle;
   accounts: IAccount[];
   team: IAccount;
 }
 
 const testVars: TestVars = {
-  Greeter: {} as Greeter,
+  RewardToken: {} as RewardToken,
+  NFTStaking: {} as NFTStaking,
+  PriceOracle: {} as PriceOracle,
+  Nft: {} as MockNFT,
+  NftOracle: {} as MockNFTOracle,
   accounts: {} as IAccount[],
   team: {} as IAccount,
 };
@@ -27,9 +41,22 @@ const testVars: TestVars = {
 const setupOtherTestEnv = async (vars: TestVars) => {
   // setup other test env
 
+  const RewardToken = await getRewardTokenDeployment();
+  const NFTStaking = await getNFTStakingDeployment();
+  const PriceOracle = await getPriceOracleDeployment();
+  const Nft = await getNftDeployment();
+  const NftOracle = await getNFTOracleDeployment();
+
+  await PriceOracle.setOracleForAsset([Nft.address], [NftOracle.address]);
+
+  await RewardToken.setMinterRole(NFTStaking.address, true);
+
   return {
-    Greeter: await deployGreeter('greeting'),
-    // Greeter: await getGreeterDeployment(),
+    RewardToken,
+    NFTStaking,
+    PriceOracle,
+    Nft,
+    NftOracle,
   };
 };
 
@@ -77,3 +104,15 @@ export function runTestSuite(title: string, tests: (arg: TestVars) => void) {
     tests(testVars);
   });
 }
+
+export const lastBlocktimestamp = async () => {
+  const block = await ethers.provider.getBlock('latest');
+  return block.timestamp;
+};
+
+export const ONE_MONTH = 86400 * 7 * 4;
+
+export const increaseTime = async (duration: number) => {
+  await ethers.provider.send('evm_increaseTime', [duration]);
+  await ethers.provider.send('evm_mine', []);
+};
